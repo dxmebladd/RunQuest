@@ -13,7 +13,12 @@ class AuthService {
       );
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      switch (e.code) {
+        case 'email-already-in-use':
+          return 'Пользователь уже создан';
+        default:
+          return 'Ошибка регистрации';
+      }
     }
   }
 
@@ -25,7 +30,15 @@ class AuthService {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return null;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      switch (e.code) {
+        case 'user-not-found':
+          return 'Пользователь не найден';
+        case 'wrong-password':
+        case 'invalid-credential':
+          return 'Неверная почта или пароль';
+        default:
+          return 'Ошибка входа';
+      }
     }
   }
 

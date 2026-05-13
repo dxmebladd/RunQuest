@@ -3,6 +3,8 @@ import 'package:runquest/screens/auth/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:runquest/services/run_logik.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:runquest/screens/main/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +22,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(fontFamily: 'Berlin'),
-        home: const LoginScreen(),
+        home: FirebaseAuth.instance.currentUser != null
+            ? const MainScreen()
+            : const LoginScreen(),
       ),
     );
   }

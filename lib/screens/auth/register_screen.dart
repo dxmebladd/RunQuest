@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:runquest/screens/main/main_screen.dart';
 import 'package:runquest/services/auth_service.dart';
+import 'package:runquest/services/firestore_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -184,6 +186,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       password: password,
                     );
                     if (error == null) {
+                      try {
+                        await _firestoreService.createUser(
+                          name: name,
+                          nickname: nickname,
+                          email: email,
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainScreen()),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(e.toString())));
+                      }
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const MainScreen()),
