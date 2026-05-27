@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
+import 'package:runquest/services/firestore_service.dart';
 import 'package:runquest/services/run_logik.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  double caloriesGoal = 0;
+  double goal = 0;
+  final FirestoreService _firestoreService = FirestoreService();
   @override
   void initState() {
     super.initState();
+    _loadGoal();
+    _loadCaloriesGoal();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RunLogik>().getCurrentLocation();
+    });
+  }
+
+  Future<void> _loadCaloriesGoal() async {
+    final loadedCaloriesGoal = await _firestoreService.getCaloriesGoal();
+    setState(() {
+      caloriesGoal = loadedCaloriesGoal;
+    });
+  }
+
+  Future<void> _loadGoal() async {
+    final loadedGoal = await _firestoreService.getGoal();
+    setState(() {
+      goal = loadedGoal;
     });
   }
 
@@ -24,13 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Consumer<RunLogik>(
         builder: (context, tracking, child) {
+          final FirestoreService _firestoreService = FirestoreService();
           final currentPosition = tracking.currentPosition;
           final route = tracking.route;
           final isRunning = tracking.isRunning;
           final distance = tracking.distance;
           final timeString = tracking.timeString;
           return Stack(
-            children: [
+            children: <Widget>[
               if (currentPosition != null)
                 FlutterMap(
                   options: MapOptions(
@@ -66,7 +86,69 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               else
                 const Center(child: CircularProgressIndicator()),
+              Positioned(
+                top: 60,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xCC2B2B2B),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${tracking.distance.toStringAsFixed(2)} / ${goal.toStringAsFixed(2)} км',
 
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          Text(
+                            '${(tracking.distance * 60).toStringAsFixed(0)} / ${caloriesGoal.toStringAsFixed(0)} ккал',
+
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      LinearProgressIndicator(
+                        color: tracking.distance >= goal
+                            ? Colors.green
+                            : Colors.blue,
+                        value: goal == 0
+                            ? 0
+                            : (tracking.distance / goal).clamp(0, 1),
+                        minHeight: 14,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        goal > 0 && tracking.distance >= goal
+                            ? 'Выполнено'
+                            : '${((goal == 0 ? 0 : tracking.distance / goal) * 100).toStringAsFixed(0)}%',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -130,9 +212,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           if (isRunning) {
-                            tracking.stopRun();
+                            try {
+                              await _firestoreService.saveRun(
+                                distance: tracking.distance,
+                                duration: tracking.seconds,
+                              );
+                              await _firestoreService.saveLastDistance(
+                                distance: tracking.distance,
+                              );
+                              tracking.stopRun();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
                           } else {
                             tracking.startRun();
                           }

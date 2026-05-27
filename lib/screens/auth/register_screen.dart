@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nicknameController = TextEditingController();
+  bool _showPasswordError = false;
 
   bool _obscurePassword = true;
 
@@ -99,8 +100,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               TextField(
                 controller: _passwordController,
-                cursorColor: Colors.white,
+                onChanged: (value) {
+                  setState(() {
+                    _showPasswordError = value.isNotEmpty && value.length < 6;
+                  });
+                },
                 obscureText: _obscurePassword,
+                cursorColor: Colors.white,
                 decoration: InputDecoration(
                   hintText: 'Пароль',
                   filled: true,
@@ -127,6 +133,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               ),
+              if (_showPasswordError)
+                const Padding(
+                  padding: EdgeInsets.only(left: 12, bottom: 6),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Пароль должен содержать минимум 6 символов',
+                      style: TextStyle(color: Colors.red, fontSize: 13),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 16),
 
               TextField(

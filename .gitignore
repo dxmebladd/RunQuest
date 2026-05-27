@@ -45,5 +45,6 @@ app.*.map.json
 # Firebase keys (важно!)
 google-services.json
 android/app/google-services.json
-*.json 
+*.json
+ 
  
