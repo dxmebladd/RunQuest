@@ -46,5 +46,6 @@ app.*.map.json
 google-services.json
 android/app/google-services.json
 *.json
+/android/build/reports/problems/problems-report.html
  
  
