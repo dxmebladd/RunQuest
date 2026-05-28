@@ -39,8 +39,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF515151),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -60,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 keyboardType: TextInputType.number,
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
-                  hintText: 'Вес',
+                  hintText: 'Вес, кг',
                   filled: true,
                   fillColor: const Color(0xFF8B8B8B),
                   border: OutlineInputBorder(
@@ -78,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 keyboardType: TextInputType.number,
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
-                  hintText: 'Рост',
+                  hintText: 'Рост, см',
                   filled: true,
                   fillColor: const Color(0xFF8B8B8B),
                   border: OutlineInputBorder(
@@ -128,13 +133,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   final height = double.tryParse(_heightController.text);
                   if (weight == null || height == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom + 5,
+                          left: 20,
+                          right: 20,
+                        ),
                         content: Text('Введите корректные данные'),
                         backgroundColor: Colors.red,
                       ),
                     );
                     return;
                   }
+                  FocusScope.of(context).unfocus();
                   await _firestoreService.saveUserData(
                     weight: weight,
                     height: height,
@@ -142,7 +154,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Данные сохранены'),
                       backgroundColor: Colors.green,
                     ),
@@ -153,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 150),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8B8B8B),

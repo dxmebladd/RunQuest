@@ -69,234 +69,258 @@ class _TasksScreenState extends State<TasksScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF515151),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF8B8B8B),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Текущая цель',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B8B8B),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Текущая цель',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${_currentDistance.toStringAsFixed(2)} / ${_goal.toStringAsFixed(2)} км',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          _goal > 0 && _currentDistance >= _goal
+                              ? Icons.check
+                              : Icons.close,
+                          color: _goal > 0 && _currentDistance >= _goal
+                              ? Colors.green
+                              : Colors.red,
+                          size: 32,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${_currentCalories.toStringAsFixed(0)} / ${_caloriesGoal.toStringAsFixed(0)} ккал',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          _caloriesGoal > 0 && _currentCalories >= _caloriesGoal
+                              ? Icons.check
+                              : Icons.close,
+                          color:
+                              _caloriesGoal > 0 &&
+                                  _currentCalories >= _caloriesGoal
+                              ? Colors.green
+                              : Colors.red,
+                          size: 32,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (_goal > 0 &&
+                        _caloriesGoal > 0 &&
+                        _currentDistance >= _goal &&
+                        _currentCalories >= _caloriesGoal)
+                      const Center(
                         child: Text(
-                          '${_currentDistance.toStringAsFixed(2)} / ${_goal.toStringAsFixed(2)} км',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
+                          'Цель выполнена ✅',
+
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      Icon(
-                        _goal > 0 && _currentDistance >= _goal
-                            ? Icons.check
-                            : Icons.close,
-                        color: _goal > 0 && _currentDistance >= _goal
-                            ? Colors.green
-                            : Colors.red,
-                        size: 32,
-                      ),
-                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+              TextField(
+                controller: _goalController,
+                keyboardType: TextInputType.number,
+                cursorColor: Colors.white,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Введите цель в км',
+                  filled: true,
+                  fillColor: const Color(0xFF8B8B8B),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${_currentCalories.toStringAsFixed(0)} / ${_caloriesGoal.toStringAsFixed(0)} ккал',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: const BorderSide(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              TextField(
+                controller: _caloriesController,
+                keyboardType: TextInputType.number,
+                cursorColor: Colors.white,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Введите цель в ккал',
+                  filled: true,
+                  fillColor: const Color(0xFF8B8B8B),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: const BorderSide(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: 365,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B8B8B),
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () async {
+                    final goal = double.tryParse(_goalController.text);
+                    final caloriesGoal = double.tryParse(
+                      _caloriesController.text,
+                    );
+                    if ((_goalController.text.isNotEmpty && goal == null) ||
+                        (_caloriesController.text.isNotEmpty &&
+                            caloriesGoal == null)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.only(
+                            bottom:
+                                MediaQuery.of(context).viewInsets.bottom + 0,
+                            left: 20,
+                            right: 20,
                           ),
+                          content: const Text(
+                            'Введите корректную цель',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.red,
                         ),
-                      ),
-                      Icon(
-                        _caloriesGoal > 0 && _currentCalories >= _caloriesGoal
-                            ? Icons.check
-                            : Icons.close,
-                        color:
-                            _caloriesGoal > 0 &&
-                                _currentCalories >= _caloriesGoal
-                            ? Colors.green
-                            : Colors.red,
-                        size: 32,
-                      ),
-                    ],
+                      );
+                      return;
+                    }
+                    final hasDistanceGoal = goal != null && goal > 0;
+
+                    final hasCaloriesGoal =
+                        caloriesGoal != null && caloriesGoal > 0;
+
+                    if (!hasDistanceGoal && !hasCaloriesGoal) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.only(
+                            bottom:
+                                MediaQuery.of(context).viewInsets.bottom + 5,
+                            left: 20,
+                            right: 20,
+                          ),
+                          content: Text('Введите хотя бы одну цель'),
+                          backgroundColor: Colors.blue,
+                        ),
+                      );
+
+                      return;
+                    }
+                    try {
+                      await _firestoreService.saveGoal(
+                        targetDistance: hasDistanceGoal ? goal : 0,
+                        targetCalories: hasCaloriesGoal ? caloriesGoal : 0,
+                      );
+                      FocusScope.of(context).unfocus();
+                      setState(() {
+                        _goal = hasDistanceGoal ? goal : 0;
+                        _caloriesGoal = hasCaloriesGoal ? caloriesGoal : 0;
+                      });
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Цель сохранена',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  },
+                  child: const Text(
+                    'Сохранить',
+                    style: TextStyle(fontSize: 20),
                   ),
-                  const SizedBox(height: 20),
-                  if (_goal > 0 &&
-                      _caloriesGoal > 0 &&
-                      _currentDistance >= _goal &&
-                      _currentCalories >= _caloriesGoal)
-                    const Center(
-                      child: Text(
-                        'Цель выполнена ✅',
-
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 25),
-            TextField(
-              controller: _goalController,
-              keyboardType: TextInputType.number,
-              cursorColor: Colors.white,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Введите цель в км',
-                filled: true,
-                fillColor: const Color(0xFF8B8B8B),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Colors.white, width: 2),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 100),
+              SizedBox(
+                width: 365,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B8B8B),
 
-            TextField(
-              controller: _caloriesController,
-              keyboardType: TextInputType.number,
-              cursorColor: Colors.white,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Введите цель в ккал',
-                filled: true,
-                fillColor: const Color(0xFF8B8B8B),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Colors.white, width: 2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: 365,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B8B8B),
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () async {
-                  final goal = double.tryParse(_goalController.text);
-                  final caloriesGoal = double.tryParse(
-                    _caloriesController.text,
-                  );
-                  if ((_goalController.text.isNotEmpty && goal == null) ||
-                      (_caloriesController.text.isNotEmpty &&
-                          caloriesGoal == null)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Введите корректную цель',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  final hasDistanceGoal = goal != null && goal > 0;
-
-                  final hasCaloriesGoal =
-                      caloriesGoal != null && caloriesGoal > 0;
-
-                  if (!hasDistanceGoal && !hasCaloriesGoal) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Введите хотя бы одну цель'),
-                        backgroundColor: Colors.blue,
-                      ),
-                    );
-
-                    return;
-                  }
-                  try {
-                    await _firestoreService.saveGoal(
-                      targetDistance: hasDistanceGoal ? goal : 0,
-                      targetCalories: hasCaloriesGoal ? caloriesGoal : 0,
-                    );
-                    FocusScope.of(context).unfocus();
-                    setState(() {
-                      _goal = hasDistanceGoal ? goal : 0;
-                      _caloriesGoal = hasCaloriesGoal ? caloriesGoal : 0;
-                    });
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Цель сохранена',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                },
-                child: const Text('Сохранить', style: TextStyle(fontSize: 20)),
-              ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: 365,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B8B8B),
-
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                  );
-                },
-                child: const Text(
-                  'История пробежек',
-                  style: TextStyle(fontSize: 22),
+                      MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                    );
+                  },
+                  child: const Text(
+                    'История пробежек',
+                    style: TextStyle(fontSize: 22),
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
