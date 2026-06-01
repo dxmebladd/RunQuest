@@ -10,18 +10,30 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double caloriesGoal = 0;
   double goal = 0;
   final FirestoreService _firestoreService = FirestoreService();
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadGoal();
     _loadCaloriesGoal();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<RunLogik>().getCurrentLocation();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
       context.read<RunLogik>().getCurrentLocation();
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _loadCaloriesGoal() async {

@@ -12,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String? _nickname;
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   String _selectedGender = 'Мужчина';
@@ -21,6 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadUserData() async {
     final data = await _firestoreService.getUserData();
     setState(() {
+      _nickname = data['nickname'];
       _weightController.text = (data['weight'] ?? '').toString();
       _heightController.text = (data['height'] ?? '').toString();
       _selectedGender = data['gender'] ?? 'Мужчина';
@@ -58,6 +60,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                _nickname == null ? 'Загрузка...' : '$_nickname',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 30),
               ),
               const SizedBox(height: 30),
               TextField(

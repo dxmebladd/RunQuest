@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:runquest/screens/home/home_screen.dart';
 import 'package:runquest/screens/tasks/tasks_screen.dart';
 import 'package:runquest/screens/settings/settings_screen.dart';
+import 'package:runquest/services/location_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,6 +12,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    checkAndRequestLocation();
+  }
+
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [

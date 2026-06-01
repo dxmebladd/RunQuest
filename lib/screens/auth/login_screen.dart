@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:runquest/screens/main/main_screen.dart';
+import 'package:runquest/services/location_service.dart';
 import 'register_screen.dart';
 import 'package:runquest/services/auth_service.dart';
 
@@ -127,6 +128,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
 
                     if (error == null) {
+                      await checkAndRequestLocation();
+                      if (!mounted) return;
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const MainScreen()),

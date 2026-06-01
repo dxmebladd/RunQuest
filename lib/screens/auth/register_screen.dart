@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:runquest/screens/main/main_screen.dart';
 import 'package:runquest/services/auth_service.dart';
 import 'package:runquest/services/firestore_service.dart';
+import 'package:runquest/services/location_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,16 +14,15 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nicknameController = TextEditingController();
-  bool _showPasswordError = false;
 
+  bool _isLoading = false;
+  bool _showPasswordError = false;
   bool _obscurePassword = true;
 
   void register() {
-    final name = _nameController.text;
     final email = _emailController.text;
     final password = _passwordController.text;
     final nickname = _nicknameController.text;
@@ -30,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nicknameController.dispose();
@@ -41,7 +40,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF515151),
-
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
@@ -59,26 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _nameController,
-                cursorColor: Colors.white,
-                decoration: InputDecoration(
-                  hintText: 'Имя',
-                  filled: true,
-                  fillColor: const Color(0xFF8B8B8B),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                    borderSide: const BorderSide(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-
               const SizedBox(height: 16),
-
               TextField(
                 controller: _emailController,
                 cursorColor: Colors.white,
@@ -164,11 +143,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
 
               const SizedBox(height: 28),
-
               SizedBox(
                 width: 350,
                 height: 50,
-
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8B8B8B),
@@ -177,65 +154,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                  onPressed: () async {
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text.trim();
-                    final name = _nameController.text.trim();
-                    final nickname = _nicknameController.text.trim();
-                    if (email.isEmpty ||
-                        password.isEmpty ||
-                        name.isEmpty ||
-                        nickname.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Заполните все поля',
-                            style: TextStyle(color: Colors.white),
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          try {
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text.trim();
+                            final nickname = _nicknameController.text.trim();
+                            if (email.isEmpty ||
+                                password.isEmpty ||
+                                nickname.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Заполните все поля',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            final error = await _authService.register(
+                              email: email,
+                              password: password,
+                            );
+                            if (error != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(error),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            await _firestoreService.createUser(
+                              nickname: nickname,
+                              email: email,
+                            );
+                            if (!mounted) return;
+                            await checkAndRequestLocation();
+                            if (!mounted) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MainScreen(),
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          }
+                        },
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
                           ),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
+                        )
+                      : const Text(
+                          'Зарегистрироваться',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      );
-                      return;
-                    }
-                    final error = await _authService.register(
-                      email: email,
-                      password: password,
-                    );
-                    if (error == null) {
-                      try {
-                        await _firestoreService.createUser(
-                          name: name,
-                          nickname: nickname,
-                          email: email,
-                        );
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const MainScreen()),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const MainScreen()),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(error),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text(
-                    'Зарегистрироваться',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
                 ),
               ),
             ],

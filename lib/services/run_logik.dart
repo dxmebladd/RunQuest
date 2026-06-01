@@ -30,17 +30,12 @@ class RunLogik extends ChangeNotifier {
   Future<void> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
-
     LocationPermission permission = await Geolocator.checkPermission();
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-
     if (permission == LocationPermission.deniedForever) return;
-
     Position position = await Geolocator.getCurrentPosition();
-
     _currentPosition = LatLng(position.latitude, position.longitude);
     notifyListeners();
   }
