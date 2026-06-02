@@ -156,7 +156,6 @@ The following files are not included in the repository:
 
 ```text
 android/app/google-services.json
-lib/firebase_options.dart
 ```
 
 Generate Firebase configuration using:
