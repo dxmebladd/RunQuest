@@ -54,7 +54,6 @@ The application uses GPS tracking to calculate distance traveled, estimate calor
 - Running history
 - Activity timestamps
 - Distance statistics
-- Calories statistics
 
 
 # 🔐 Authentication
@@ -170,7 +169,7 @@ flutterfire configure
 ## 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/runquest.git
+git clone https://github.com/dxmebladd/runquest.git
 cd runquest
 ```
 
