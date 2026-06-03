@@ -13,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double caloriesGoal = 0;
   double goal = 0;
+  double _weight = 70;
+  String _gender = 'Мужчина';
   final FirestoreService _firestoreService = FirestoreService();
   @override
   void initState() {
@@ -20,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadGoal();
     _loadCaloriesGoal();
+    _loadUserData;
     context.read<RunLogik>().getCurrentLocation();
   }
 
@@ -34,6 +37,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  Future<void> _loadUserData() async {
+    final data = await _firestoreService.getUserData();
+    setState(() {
+      _weight = (data['weight'] ?? 70).toDouble();
+      _gender = data['gender'] ?? 'Мужчина';
+    });
   }
 
   Future<void> _loadCaloriesGoal() async {
@@ -126,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
 
                           Text(
-                            '${(tracking.distance * 60).toStringAsFixed(0)} / ${caloriesGoal.toStringAsFixed(0)} ккал',
+                            '${(_gender == 'Женщина' ? tracking.distance * _weight * 0.9 : tracking.distance * _weight * 1.036).toStringAsFixed(0)} / ${caloriesGoal.toStringAsFixed(0)} ккал',
 
                             style: const TextStyle(
                               color: Colors.white,
